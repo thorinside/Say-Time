@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<TableLayout android:id="@+id/TableLayout01" android:layout_width="fill_parent" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android" android:isScrollContainer="true" android:background="#777766">
+	
+	<AnalogClock android:clickable="true" 
+		android:id="@+id/AnalogClock" android:layout_width="fill_parent" android:layout_height="fill_parent" android:dial="@drawable/background">
+	</AnalogClock>
+
+</TableLayout>
