@@ -1,0 +1,38 @@
+Say Time
+========
+
+An Android application that provides a way for commuters to learn the current 
+time by pressing the headset button on their phone. The application has been 
+written to support Android 2.2 audio focus management and audio focus ducking. 
+
+The application can be configured to provide a calculation of the duration 
+between subsequent queries. The application can also, optionally, say the 
+time at the top of the hour.
+
+Author
+======
+
+Say Time is currently written and maintained by 
+Neal Sanche <thorinside@gmail.com> feel free to send email to him in order
+to request features or report bugs.
+
+License
+=======
+
+    This file is part of Say Time.
+
+    Say Time is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Say Time is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Say Time.  If not, see <http://www.gnu.org/licenses/>.
+	
+
+	
