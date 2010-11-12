@@ -19,21 +19,37 @@ package org.nsdev.saytimeapp;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.widget.Toast;
+import android.media.AudioManager;
+import android.telephony.TelephonyManager;
+import android.util.Log;
 
 public class AlarmIntentReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
         try {
+            // It's important to do the hourly chime only if the
+            // phone is not in vibrate mode
+            AudioManager am = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+            switch (am.getRingerMode()) {
+                case AudioManager.RINGER_MODE_SILENT:
+                case AudioManager.RINGER_MODE_VIBRATE:
+                    return;
+            }
+
+            // Make sure there isn't a call coming in, or in progress
+            TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+            if (tm.getCallState() != TelephonyManager.CALL_STATE_IDLE)
+                return;
+
             Intent sayTimeIntent = new Intent(context, SayTimeService.class);
             sayTimeIntent.setAction(SayTimeService.SAYTIME_ACTION);
             sayTimeIntent.putExtra("skip_interval", true);
             sayTimeIntent.putExtra("hourly_chime", true);
             context.startService(sayTimeIntent);
-        } catch (Exception e) {
-            Toast.makeText(context, "There was an error somewhere, but we still received an alarm", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
+
+        } catch (Throwable ex) {
+            Log.e("SayTimeAlarmIntentReceiver", "Error during alarm.", ex);
         }
     }
 }
