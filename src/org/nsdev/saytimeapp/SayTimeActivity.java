@@ -66,7 +66,7 @@ public class SayTimeActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(getResources().getString(R.string.Settings));
+        getMenuInflater().inflate(R.menu.main_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -78,7 +78,7 @@ public class SayTimeActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if (item.getTitle() == getResources().getString(R.string.Settings)) {
+        if (item.getItemId() == R.id.settings_menu) {
             // Fire off the settings panel activity
             Log.i(TAG, "Settings selected.");
 
