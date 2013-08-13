@@ -30,6 +30,7 @@ import android.view.KeyEvent;
 public class MediaButtonIntentReceiver extends BroadcastReceiver {
 
     public static final int KEYCODE_MEDIA_PLAY = 126;
+    public static final int KEYCODE_MEDIA_PAUSE = 127;
     private static boolean mPressed = false;
     private static boolean mIsHook = false;
 
@@ -63,15 +64,19 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver {
 
         int keycode = event.getKeyCode();
         int action = event.getAction();
+        boolean handled = false;
 
         switch (keycode) {
             case KeyEvent.KEYCODE_CAMERA:
             case KeyEvent.KEYCODE_HEADSETHOOK:
             case KEYCODE_MEDIA_PLAY:
+            case KEYCODE_MEDIA_PAUSE:
                 if ((keycode == KeyEvent.KEYCODE_HEADSETHOOK && headSetEnabled) ||
                         (keycode == KeyEvent.KEYCODE_CAMERA && cameraButtonEnabled) ||
-                        (keycode == KEYCODE_MEDIA_PLAY && headSetEnabled)) {
+                        (keycode == KEYCODE_MEDIA_PLAY && headSetEnabled) ||
+                        (keycode == KEYCODE_MEDIA_PAUSE && headSetEnabled) ) {
                     mIsHook = true;
+                    handled = true;
                 }
                 break;
         }
@@ -81,21 +86,26 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver {
                 mPressed = true;
                 if (keycode == KeyEvent.KEYCODE_CAMERA && cameraButtonEnabled) {
                     sayTime(context);
+                    handled = true;
                 }
                 break;
             case KeyEvent.ACTION_UP:
                 if (mPressed && mIsHook) {
                     if ((keycode == KeyEvent.KEYCODE_HEADSETHOOK && headSetEnabled) ||
                             (keycode == KEYCODE_MEDIA_PLAY && headSetEnabled) ||
+                            (keycode == KEYCODE_MEDIA_PAUSE && headSetEnabled) ||
                             (keycode == KeyEvent.KEYCODE_CAMERA && cameraButtonEnabled)) {
                         sayTime(context);
+                        handled = true;
                     }
                 }
                 break;
         }
 
-        if (isOrderedBroadcast())
+        if (isOrderedBroadcast() && handled)
             abortBroadcast();
+        else
+            clearAbortBroadcast();
     }
 
     private void sayTime(final Context context) {

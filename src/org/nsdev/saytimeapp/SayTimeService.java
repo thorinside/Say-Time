@@ -74,32 +74,34 @@ public class SayTimeService extends Service {
         Intent alarmIntent = new Intent(getApplicationContext(), AlarmIntentReceiver.class);
         PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, alarmIntent, 0);
 
-        if (hourlyChime && !mAlarmSet) {
-            Log.d(TAG, "Arming hourly chime.");
+        if (intent.getAction() != null && intent.getAction().equals(CONFIGURATION_ACTION)) {
+            if (hourlyChime && !mAlarmSet) {
+                Log.d(TAG, "Arming hourly chime.");
 
-            Calendar c = Calendar.getInstance();
-            if (!TESTING) {
-                c.clear(Calendar.MILLISECOND);
-                c.clear(Calendar.SECOND);
-                c.clear(Calendar.MINUTE);
-                c.add(Calendar.HOUR, 1);
+                Calendar c = Calendar.getInstance();
+                if (!TESTING) {
+                    c.clear(Calendar.MILLISECOND);
+                    c.clear(Calendar.SECOND);
+                    c.clear(Calendar.MINUTE);
+                    c.add(Calendar.HOUR, 1);
+                }
+
+                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), TESTING ? 60*1000 : AlarmManager.INTERVAL_HOUR, alarmPendingIntent);
+
+                mAlarmSet = true;
+
+            } else if (!hourlyChime) {
+
+                Log.d(TAG, "Dis-arming hourly chime.");
+
+                alarmManager.cancel(alarmPendingIntent);
+
+                // Skip this hourly chime entirely
+                if (intent.getBooleanExtra("hourly_chime", false))
+                    return;
+
+                mAlarmSet = false;
             }
-
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), 30*1000, alarmPendingIntent);
-
-            mAlarmSet = true;
-
-        } else if (!hourlyChime) {
-
-            Log.d(TAG, "Dis-arming hourly chime.");
-
-            alarmManager.cancel(alarmPendingIntent);
-
-            // Skip this hourly chime entirely
-            if (intent.getBooleanExtra("hourly_chime", false))
-                return;
-
-            mAlarmSet = false;
         }
 
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
@@ -114,7 +116,6 @@ public class SayTimeService extends Service {
                     } else {
                         Log.d(TAG, "Focus Changed Detected: " + focusChange);
                     }
-
                 }
             };
         }
