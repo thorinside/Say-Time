@@ -29,6 +29,7 @@ import android.view.KeyEvent;
 
 public class MediaButtonIntentReceiver extends BroadcastReceiver {
 
+    public static final int KEYCODE_MEDIA_PLAY = 126;
     private static boolean mPressed = false;
     private static boolean mIsHook = false;
 
@@ -66,7 +67,10 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver {
         switch (keycode) {
             case KeyEvent.KEYCODE_CAMERA:
             case KeyEvent.KEYCODE_HEADSETHOOK:
-                if ((keycode == KeyEvent.KEYCODE_HEADSETHOOK && headSetEnabled) || keycode == KeyEvent.KEYCODE_CAMERA && cameraButtonEnabled) {
+            case KEYCODE_MEDIA_PLAY:
+                if ((keycode == KeyEvent.KEYCODE_HEADSETHOOK && headSetEnabled) ||
+                        (keycode == KeyEvent.KEYCODE_CAMERA && cameraButtonEnabled) ||
+                        (keycode == KEYCODE_MEDIA_PLAY && headSetEnabled)) {
                     mIsHook = true;
                 }
                 break;
@@ -81,7 +85,9 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver {
                 break;
             case KeyEvent.ACTION_UP:
                 if (mPressed && mIsHook) {
-                    if ((keycode == KeyEvent.KEYCODE_HEADSETHOOK && headSetEnabled) || keycode == KeyEvent.KEYCODE_CAMERA && cameraButtonEnabled) {
+                    if ((keycode == KeyEvent.KEYCODE_HEADSETHOOK && headSetEnabled) ||
+                            (keycode == KEYCODE_MEDIA_PLAY && headSetEnabled) ||
+                            (keycode == KeyEvent.KEYCODE_CAMERA && cameraButtonEnabled)) {
                         sayTime(context);
                     }
                 }

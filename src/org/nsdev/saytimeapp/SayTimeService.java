@@ -43,6 +43,7 @@ public class SayTimeService extends Service {
 
     public static final String SAYTIME_ACTION = "org.nsdev.saytime.SayTimeService.SayTime";
     public static final String CONFIGURATION_ACTION = "org.nsdev.saytime.SayTimeService.Configure";
+    public static final boolean TESTING = false; // DO NOT CHECK IN IF TRUE
     private static final String TAG = "SayTimeService";
 
     private WakeLock mWakeLock;
@@ -54,7 +55,7 @@ public class SayTimeService extends Service {
     private Object mKeepAliveSync = new Object();
     private OnAudioFocusChangeListener mAudioFocusListener;
     private boolean mSleepRequested = false;
-    private PendingIntent alarmPendingIntent;
+    private boolean mAlarmSet = false;
 
     @Override
     public void onStart(Intent intent, int startId) {
@@ -70,28 +71,35 @@ public class SayTimeService extends Service {
 
         AlarmManager alarmManager = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
 
-        if (hourlyChime && alarmPendingIntent == null) {
+        Intent alarmIntent = new Intent(getApplicationContext(), AlarmIntentReceiver.class);
+        PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, alarmIntent, 0);
+
+        if (hourlyChime && !mAlarmSet) {
             Log.d(TAG, "Arming hourly chime.");
-            Intent alarmIntent = new Intent(getApplicationContext(), AlarmIntentReceiver.class);
-            alarmPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, alarmIntent, 0);
 
             Calendar c = Calendar.getInstance();
-            c.clear(Calendar.MILLISECOND);
-            c.clear(Calendar.SECOND);
-            c.clear(Calendar.MINUTE);
-            c.add(Calendar.HOUR, 1);
+            if (!TESTING) {
+                c.clear(Calendar.MILLISECOND);
+                c.clear(Calendar.SECOND);
+                c.clear(Calendar.MINUTE);
+                c.add(Calendar.HOUR, 1);
+            }
 
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), AlarmManager.INTERVAL_HOUR, alarmPendingIntent);
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), 30*1000, alarmPendingIntent);
 
-        } else if (!hourlyChime && alarmPendingIntent != null) {
+            mAlarmSet = true;
 
-            Log.d(TAG, "Cancelling hourly chime.");
+        } else if (!hourlyChime) {
+
+            Log.d(TAG, "Dis-arming hourly chime.");
+
             alarmManager.cancel(alarmPendingIntent);
-            alarmPendingIntent = null;
 
             // Skip this hourly chime entirely
             if (intent.getBooleanExtra("hourly_chime", false))
                 return;
+
+            mAlarmSet = false;
         }
 
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
