@@ -55,6 +55,34 @@ public class SayTimeService extends Service implements OnInitListener {
     private OnAudioFocusChangeListener mAudioFocusListener;
     private boolean mSleepRequested = false;
     private boolean mAlarmSet = false;
+    private static Object mTextToSpeechLock = new Object();
+    private static TextToSpeech mTextToSpeech;
+    private static boolean mTextToSpeechInitialized = false;
+
+    @Override
+    public void onCreate() {
+
+        synchronized(mTextToSpeechLock) {
+            if (mTextToSpeech == null) {
+                mTextToSpeech = new TextToSpeech(this, this);
+            }
+        }
+
+        super.onCreate();
+    }
+
+    @Override
+    public void onDestroy() {
+
+        synchronized(mTextToSpeechLock) {
+            if (mTextToSpeechInitialized) {
+                mTextToSpeechInitialized = false;
+                mTextToSpeech.shutdown();
+                mTextToSpeech = null;
+            }
+        }
+        super.onDestroy();
+    }
 
     @Override
     public void onStart(Intent intent, int startId) {
@@ -192,16 +220,6 @@ public class SayTimeService extends Service implements OnInitListener {
     }
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
@@ -215,38 +233,43 @@ public class SayTimeService extends Service implements OnInitListener {
             mKeepAliveSync.notifyAll();
         }
 
-        int focusResult = mAudioManager.requestAudioFocus(mAudioFocusListener, AudioManager.STREAM_NOTIFICATION,
-                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
+        if (mTextToSpeechInitialized) {
+            Log.d(TAG, "Preparing to speak...");
 
-        if (focusResult == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
-            Log.i(TAG, "Audio Focus Request Failed.");
-            return;
-        }
+            int focusResult = mAudioManager.requestAudioFocus(mAudioFocusListener, AudioManager.STREAM_NOTIFICATION,
+                    AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
 
-        //if (mWakeLock != null)
-        //    mWakeLock.acquire();
-
-        Log.d(TAG, "Preparing to speak...");
-
-        ((SayTimeApp)getApplication()).textToSpeech.setOnUtteranceCompletedListener(new OnUtteranceCompletedListener() {
-            @Override
-            public void onUtteranceCompleted(String utteranceId) {
-                Log.d(TAG, "Utterance Completed Callback");
-
-                // Abandon audio focus
-                mAudioManager.abandonAudioFocus(mAudioFocusListener);
+            if (focusResult == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
+                Log.i(TAG, "Audio Focus Request Failed.");
+                return;
             }
-        });
 
-        String currentTime = formatCurrentTime(skipInterval);
-        Log.d(TAG, "Saying: " + currentTime);
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "42");
+            mTextToSpeech.setOnUtteranceCompletedListener(new OnUtteranceCompletedListener() {
+                @Override
+                public void onUtteranceCompleted(String utteranceId) {
+                    Log.d(TAG, "Utterance Completed Callback");
 
-        Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.SayingTime), Toast.LENGTH_SHORT);
-        toast.show();
+                    // Abandon audio focus
+                    mAudioManager.abandonAudioFocus(mAudioFocusListener);
+                }
+            });
 
-        ((SayTimeApp)getApplication()).textToSpeech.speak(currentTime, TextToSpeech.QUEUE_FLUSH, params);
+            String currentTime = formatCurrentTime(skipInterval);
+            Log.d(TAG, "Saying: " + currentTime);
+            HashMap<String, String> params = new HashMap<String, String>();
+            params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "42");
+
+            Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.SayingTime), Toast.LENGTH_SHORT);
+            toast.show();
+
+            if (mTextToSpeechInitialized) {
+                mTextToSpeech.speak(currentTime, TextToSpeech.QUEUE_FLUSH, params);
+            }
+        }
+        else
+        {
+            Log.w(TAG, "Text To Speech not initialized.");
+        }
     }
 
     private String formatCurrentTime(boolean skipInterval) {
@@ -368,5 +391,8 @@ public class SayTimeService extends Service implements OnInitListener {
     @Override
     public void onInit(int i) {
         Log.e(TAG, "onInit called: " + i);
+        synchronized (mTextToSpeechLock) {
+            mTextToSpeechInitialized = true;
+        }
     }
 }

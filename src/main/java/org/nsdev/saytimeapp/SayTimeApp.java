@@ -9,28 +9,17 @@ import android.util.Log;
 /**
  * Created by neal on 2013-08-13.
  */
-public class SayTimeApp extends Application implements TextToSpeech.OnInitListener {
+public class SayTimeApp extends Application {
 
     private static final String TAG = "SayTimeApp";
 
-    public static TextToSpeech textToSpeech;
-
     @Override
     public void onCreate() {
-        textToSpeech = new TextToSpeech(this, this);
         super.onCreate();
     }
 
     @Override
     public void onTerminate() {
-        Log.e(TAG, "Text to Speech Terminated.");
-        textToSpeech.stop();
-        textToSpeech.shutdown();
         super.onTerminate();
-    }
-
-    @Override
-    public void onInit(int i) {
-        Log.e(TAG, "Text To Speech Initialized: " + i);
     }
 }
