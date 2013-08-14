@@ -16,19 +16,19 @@
  */
 package org.nsdev.saytimeapp;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AnalogClock;
 
-public class SayTimeActivity extends Activity {
+import com.actionbarsherlock.app.SherlockActivity;
+
+public class SayTimeActivity extends SherlockActivity {
 
     private static final String TAG = "SayTimeActivity";
     public static final String PREFS_NAME = "SayTimePreferences";
@@ -45,8 +45,8 @@ public class SayTimeActivity extends Activity {
         final AnalogClock clock = (AnalogClock)findViewById(R.id.AnalogClock);
 
         Log.d(TAG, "Starting SayTimeService...");
-        Intent svc = new Intent(this, SayTimeService.class);
-        startService(svc);
+        //Intent svc = new Intent(this, SayTimeService.class);
+        //startService(svc);
 
         Log.d(TAG, "Started SayTimeService.");
 
@@ -65,8 +65,8 @@ public class SayTimeActivity extends Activity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
+    public boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu) {
+        this.getSupportMenuInflater().inflate(R.menu.main_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -75,9 +75,10 @@ public class SayTimeActivity extends Activity {
         super.onDestroy();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
 
+
+    @Override
+    public boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem item) {
         if (item.getItemId() == R.id.settings_menu) {
             // Fire off the settings panel activity
             Log.i(TAG, "Settings selected.");

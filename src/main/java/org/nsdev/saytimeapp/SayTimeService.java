@@ -39,7 +39,7 @@ import android.speech.tts.TextToSpeech.OnUtteranceCompletedListener;
 import android.util.Log;
 import android.widget.Toast;
 
-public class SayTimeService extends Service {
+public class SayTimeService extends Service implements OnInitListener {
 
     public static final String SAYTIME_ACTION = "org.nsdev.saytime.SayTimeService.SayTime";
     public static final String CONFIGURATION_ACTION = "org.nsdev.saytime.SayTimeService.Configure";
@@ -47,7 +47,6 @@ public class SayTimeService extends Service {
     private static final String TAG = "SayTimeService";
 
     private WakeLock mWakeLock;
-    private TextToSpeech mTts;
     private static long mLastTime = 0;
     private AudioManager mAudioManager;
     private AsyncTask<Void, Void, Void> mKeepAliveTask;
@@ -74,7 +73,7 @@ public class SayTimeService extends Service {
         Intent alarmIntent = new Intent(getApplicationContext(), AlarmIntentReceiver.class);
         PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, alarmIntent, 0);
 
-        if (intent.getAction() != null && intent.getAction().equals(CONFIGURATION_ACTION)) {
+        if (intent != null && intent.getAction() != null && intent.getAction().equals(CONFIGURATION_ACTION)) {
             if (hourlyChime && !mAlarmSet) {
                 Log.d(TAG, "Arming hourly chime.");
 
@@ -203,18 +202,8 @@ public class SayTimeService extends Service {
     }
 
     @Override
-    public IBinder onBind(Intent arg0) {
+    public IBinder onBind(Intent intent) {
         return null;
-    }
-
-    @Override
-    public void onRebind(Intent intent) {
-        super.onRebind(intent);
-    }
-
-    @Override
-    public boolean onUnbind(Intent intent) {
-        return super.onUnbind(intent);
     }
 
     private void sayTime(final boolean skipInterval) {
@@ -234,42 +223,30 @@ public class SayTimeService extends Service {
             return;
         }
 
-        if (mWakeLock != null)
-            mWakeLock.acquire();
+        //if (mWakeLock != null)
+        //    mWakeLock.acquire();
 
-        mTts = new TextToSpeech(this, new OnInitListener() {
+        Log.d(TAG, "Preparing to speak...");
+
+        ((SayTimeApp)getApplication()).textToSpeech.setOnUtteranceCompletedListener(new OnUtteranceCompletedListener() {
             @Override
-            public void onInit(int status) {
-                if (status == 0) {
-                    mTts.setOnUtteranceCompletedListener(new OnUtteranceCompletedListener() {
-                        @Override
-                        public void onUtteranceCompleted(String utteranceId) {
-                            Log.d(TAG, "Utterance Completed Callback");
-                            mTts.shutdown();
-                            if (mWakeLock != null)
-                                mWakeLock.release();
+            public void onUtteranceCompleted(String utteranceId) {
+                Log.d(TAG, "Utterance Completed Callback");
 
-                            // Abandon audio focus
-                            mAudioManager.abandonAudioFocus(mAudioFocusListener);
-                        }
-                    });
-
-                    String currentTime = formatCurrentTime(skipInterval);
-                    Log.d(TAG, "Saying: " + currentTime);
-                    HashMap<String, String> params = new HashMap<String, String>();
-                    params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "42");
-
-                    Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.SayingTime), Toast.LENGTH_SHORT);
-                    toast.show();
-
-                    mTts.speak(currentTime, 0, params);
-                } else {
-                    mTts.shutdown();
-                    if (mWakeLock != null)
-                        mWakeLock.release();
-                }
+                // Abandon audio focus
+                mAudioManager.abandonAudioFocus(mAudioFocusListener);
             }
         });
+
+        String currentTime = formatCurrentTime(skipInterval);
+        Log.d(TAG, "Saying: " + currentTime);
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "42");
+
+        Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.SayingTime), Toast.LENGTH_SHORT);
+        toast.show();
+
+        ((SayTimeApp)getApplication()).textToSpeech.speak(currentTime, TextToSpeech.QUEUE_FLUSH, params);
     }
 
     private String formatCurrentTime(boolean skipInterval) {
@@ -386,5 +363,10 @@ public class SayTimeService extends Service {
             mLastTime = currentTime;
 
         return buf.toString();
+    }
+
+    @Override
+    public void onInit(int i) {
+        Log.e(TAG, "onInit called: " + i);
     }
 }

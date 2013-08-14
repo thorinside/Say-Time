@@ -112,15 +112,17 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver {
         mPressed = false;
         mIsHook = false;
 
+        /*
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         final WakeLock mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, this.getClass().getName());
         mWakeLock.setReferenceCounted(false);
         mWakeLock.acquire();
+        */
 
         Intent intent = new Intent(context, SayTimeService.class);
         intent.setAction(SayTimeService.SAYTIME_ACTION);
         context.startService(intent);
 
-        mWakeLock.release();
+        /*mWakeLock.release()*/;
     }
 }
