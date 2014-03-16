@@ -16,9 +16,6 @@
  */
 package org.nsdev.saytimeapp;
 
-import java.util.Calendar;
-import java.util.HashMap;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -34,32 +31,42 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
-import android.speech.tts.TextToSpeech.OnInitListener;
 import android.speech.tts.TextToSpeech.OnUtteranceCompletedListener;
 import android.util.Log;
 import android.widget.Toast;
+
+import java.util.Calendar;
+import java.util.HashMap;
 
 public class SayTimeService extends Service {
 
     public static final String SAYTIME_ACTION = "org.nsdev.saytime.SayTimeService.SayTime";
     public static final String CONFIGURATION_ACTION = "org.nsdev.saytime.SayTimeService.Configure";
+    public static final boolean TESTING = false; // DO NOT CHECK IN IF TRUE
     private static final String TAG = "SayTimeService";
-
-    private WakeLock mWakeLock;
-    private TextToSpeech mTts;
     private static long mLastTime = 0;
+    private WakeLock mWakeLock;
     private AudioManager mAudioManager;
     private AsyncTask<Void, Void, Void> mKeepAliveTask;
     private ComponentName mComponentName;
     private Object mKeepAliveSync = new Object();
     private OnAudioFocusChangeListener mAudioFocusListener;
     private boolean mSleepRequested = false;
-    private PendingIntent alarmPendingIntent;
+    private boolean mAlarmSet = false;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
 
     @Override
     public void onStart(Intent intent, int startId) {
         Log.d(TAG, "Service onStart called.");
-
         super.onStart(intent, startId);
 
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -70,28 +77,37 @@ public class SayTimeService extends Service {
 
         AlarmManager alarmManager = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
 
-        if (hourlyChime && alarmPendingIntent == null) {
-            Log.d(TAG, "Arming hourly chime.");
-            Intent alarmIntent = new Intent(getApplicationContext(), AlarmIntentReceiver.class);
-            alarmPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, alarmIntent, 0);
+        Intent alarmIntent = new Intent(getApplicationContext(), AlarmIntentReceiver.class);
+        PendingIntent alarmPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, alarmIntent, 0);
 
-            Calendar c = Calendar.getInstance();
-            c.clear(Calendar.MILLISECOND);
-            c.clear(Calendar.SECOND);
-            c.clear(Calendar.MINUTE);
-            c.add(Calendar.HOUR, 1);
+        if (intent != null && intent.getAction() != null && intent.getAction().equals(CONFIGURATION_ACTION)) {
+            if (hourlyChime && !mAlarmSet) {
+                Log.d(TAG, "Arming hourly chime.");
 
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), AlarmManager.INTERVAL_HOUR, alarmPendingIntent);
+                Calendar c = Calendar.getInstance();
+                if (!TESTING) {
+                    c.clear(Calendar.MILLISECOND);
+                    c.clear(Calendar.SECOND);
+                    c.clear(Calendar.MINUTE);
+                    c.add(Calendar.HOUR, 1);
+                }
 
-        } else if (!hourlyChime && alarmPendingIntent != null) {
+                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), TESTING ? 60*1000 : AlarmManager.INTERVAL_HOUR, alarmPendingIntent);
 
-            Log.d(TAG, "Cancelling hourly chime.");
-            alarmManager.cancel(alarmPendingIntent);
-            alarmPendingIntent = null;
+                mAlarmSet = true;
 
-            // Skip this hourly chime entirely
-            if (intent.getBooleanExtra("hourly_chime", false))
-                return;
+            } else if (!hourlyChime) {
+
+                Log.d(TAG, "Dis-arming hourly chime.");
+
+                alarmManager.cancel(alarmPendingIntent);
+
+                // Skip this hourly chime entirely
+                if (intent.getBooleanExtra("hourly_chime", false))
+                    return;
+
+                mAlarmSet = false;
+            }
         }
 
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
@@ -106,7 +122,6 @@ public class SayTimeService extends Service {
                     } else {
                         Log.d(TAG, "Focus Changed Detected: " + focusChange);
                     }
-
                 }
             };
         }
@@ -184,28 +199,8 @@ public class SayTimeService extends Service {
     }
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
-    @Override
-    public IBinder onBind(Intent arg0) {
+    public IBinder onBind(Intent intent) {
         return null;
-    }
-
-    @Override
-    public void onRebind(Intent intent) {
-        super.onRebind(intent);
-    }
-
-    @Override
-    public boolean onUnbind(Intent intent) {
-        return super.onUnbind(intent);
     }
 
     private void sayTime(final boolean skipInterval) {
@@ -217,6 +212,8 @@ public class SayTimeService extends Service {
             mKeepAliveSync.notifyAll();
         }
 
+        Log.d(TAG, "Preparing to speak...");
+
         int focusResult = mAudioManager.requestAudioFocus(mAudioFocusListener, AudioManager.STREAM_NOTIFICATION,
                 AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
 
@@ -225,42 +222,25 @@ public class SayTimeService extends Service {
             return;
         }
 
-        if (mWakeLock != null)
-            mWakeLock.acquire();
-
-        mTts = new TextToSpeech(this, new OnInitListener() {
+        SayTimeApp.mTTSEngineManager.getTTS().setOnUtteranceCompletedListener(new OnUtteranceCompletedListener() {
             @Override
-            public void onInit(int status) {
-                if (status == 0) {
-                    mTts.setOnUtteranceCompletedListener(new OnUtteranceCompletedListener() {
-                        @Override
-                        public void onUtteranceCompleted(String utteranceId) {
-                            Log.d(TAG, "Utterance Completed Callback");
-                            mTts.shutdown();
-                            if (mWakeLock != null)
-                                mWakeLock.release();
+            public void onUtteranceCompleted(String utteranceId) {
+                Log.d(TAG, "Utterance Completed Callback");
 
-                            // Abandon audio focus
-                            mAudioManager.abandonAudioFocus(mAudioFocusListener);
-                        }
-                    });
-
-                    String currentTime = formatCurrentTime(skipInterval);
-                    Log.d(TAG, "Saying: " + currentTime);
-                    HashMap<String, String> params = new HashMap<String, String>();
-                    params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "42");
-
-                    Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.SayingTime), Toast.LENGTH_SHORT);
-                    toast.show();
-
-                    mTts.speak(currentTime, 0, params);
-                } else {
-                    mTts.shutdown();
-                    if (mWakeLock != null)
-                        mWakeLock.release();
-                }
+                // Abandon audio focus
+                mAudioManager.abandonAudioFocus(mAudioFocusListener);
             }
         });
+
+        String currentTime = formatCurrentTime(skipInterval);
+        Log.d(TAG, "Saying: " + currentTime);
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "42");
+
+        Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.SayingTime), Toast.LENGTH_SHORT);
+        toast.show();
+
+        SayTimeApp.mTTSEngineManager.getTTS().speak(currentTime, TextToSpeech.QUEUE_FLUSH, params);
     }
 
     private String formatCurrentTime(boolean skipInterval) {

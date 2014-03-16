@@ -25,3 +25,11 @@ local.properties
 .#*
 .*.swp
 .DS_Store
+.gradle
+.settings
+build
+workspace.xml
+.idea/libraries
+.idea/
+*.iml
+

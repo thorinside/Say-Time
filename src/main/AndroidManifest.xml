@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="org.nsdev.saytimeapp"
+          android:versionCode="13"
+          android:versionName="1.5.4">
+
+    <application
+            android:name=".SayTimeApp"
+            android:icon="@drawable/icon"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+
+        <activity
+                android:name=".SayTimeActivity"
+                android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name=".SettingsActivity"
+                android:label="@string/set_preferences">
+        </activity>
+
+
+        <service
+                android:name="SayTimeService"/>
+
+
+        <!-- Adding a receiver that will intercept the media button and perform 
+            actions. -->
+        <receiver android:name="MediaButtonIntentReceiver">
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="android.intent.action.MEDIA_BUTTON"/>
+            </intent-filter>
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="android.intent.action.CAMERA_BUTTON"/>
+            </intent-filter>
+            <intent-filter android:priority="1000">
+                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="android.intent.action.CALL_BUTTON"/>
+
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name="AlarmIntentReceiver"
+            android:process=":remote" />
+
+        <receiver android:name="WidgetProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                    android:name="android.appwidget.provider"
+                    android:resource="@xml/appwidget_info"/>
+        </receiver>
+    </application>
+
+    <uses-sdk
+        android:minSdkVersion="9"
+        android:targetSdkVersion="18" />
+
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+
+</manifest> 
