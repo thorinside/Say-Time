@@ -16,9 +16,6 @@
  */
 package org.nsdev.saytimeapp;
 
-import java.util.Calendar;
-import java.util.HashMap;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -34,20 +31,21 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
-import android.speech.tts.TextToSpeech.OnInitListener;
 import android.speech.tts.TextToSpeech.OnUtteranceCompletedListener;
 import android.util.Log;
 import android.widget.Toast;
 
-public class SayTimeService extends Service implements OnInitListener {
+import java.util.Calendar;
+import java.util.HashMap;
+
+public class SayTimeService extends Service {
 
     public static final String SAYTIME_ACTION = "org.nsdev.saytime.SayTimeService.SayTime";
     public static final String CONFIGURATION_ACTION = "org.nsdev.saytime.SayTimeService.Configure";
     public static final boolean TESTING = false; // DO NOT CHECK IN IF TRUE
     private static final String TAG = "SayTimeService";
-
-    private WakeLock mWakeLock;
     private static long mLastTime = 0;
+    private WakeLock mWakeLock;
     private AudioManager mAudioManager;
     private AsyncTask<Void, Void, Void> mKeepAliveTask;
     private ComponentName mComponentName;
@@ -55,39 +53,20 @@ public class SayTimeService extends Service implements OnInitListener {
     private OnAudioFocusChangeListener mAudioFocusListener;
     private boolean mSleepRequested = false;
     private boolean mAlarmSet = false;
-    private static Object mTextToSpeechLock = new Object();
-    private static TextToSpeech mTextToSpeech;
-    private static boolean mTextToSpeechInitialized = false;
 
     @Override
     public void onCreate() {
-
-        synchronized(mTextToSpeechLock) {
-            if (mTextToSpeech == null) {
-                mTextToSpeech = new TextToSpeech(this, this);
-            }
-        }
-
         super.onCreate();
     }
 
     @Override
     public void onDestroy() {
-
-        synchronized(mTextToSpeechLock) {
-            if (mTextToSpeechInitialized) {
-                mTextToSpeechInitialized = false;
-                mTextToSpeech.shutdown();
-                mTextToSpeech = null;
-            }
-        }
         super.onDestroy();
     }
 
     @Override
     public void onStart(Intent intent, int startId) {
         Log.d(TAG, "Service onStart called.");
-
         super.onStart(intent, startId);
 
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -233,43 +212,35 @@ public class SayTimeService extends Service implements OnInitListener {
             mKeepAliveSync.notifyAll();
         }
 
-        if (mTextToSpeechInitialized) {
-            Log.d(TAG, "Preparing to speak...");
+        Log.d(TAG, "Preparing to speak...");
 
-            int focusResult = mAudioManager.requestAudioFocus(mAudioFocusListener, AudioManager.STREAM_NOTIFICATION,
-                    AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
+        int focusResult = mAudioManager.requestAudioFocus(mAudioFocusListener, AudioManager.STREAM_NOTIFICATION,
+                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
 
-            if (focusResult == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
-                Log.i(TAG, "Audio Focus Request Failed.");
-                return;
-            }
-
-            mTextToSpeech.setOnUtteranceCompletedListener(new OnUtteranceCompletedListener() {
-                @Override
-                public void onUtteranceCompleted(String utteranceId) {
-                    Log.d(TAG, "Utterance Completed Callback");
-
-                    // Abandon audio focus
-                    mAudioManager.abandonAudioFocus(mAudioFocusListener);
-                }
-            });
-
-            String currentTime = formatCurrentTime(skipInterval);
-            Log.d(TAG, "Saying: " + currentTime);
-            HashMap<String, String> params = new HashMap<String, String>();
-            params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "42");
-
-            Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.SayingTime), Toast.LENGTH_SHORT);
-            toast.show();
-
-            if (mTextToSpeechInitialized) {
-                mTextToSpeech.speak(currentTime, TextToSpeech.QUEUE_FLUSH, params);
-            }
+        if (focusResult == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
+            Log.i(TAG, "Audio Focus Request Failed.");
+            return;
         }
-        else
-        {
-            Log.w(TAG, "Text To Speech not initialized.");
-        }
+
+        SayTimeApp.mTTSEngineManager.getTTS().setOnUtteranceCompletedListener(new OnUtteranceCompletedListener() {
+            @Override
+            public void onUtteranceCompleted(String utteranceId) {
+                Log.d(TAG, "Utterance Completed Callback");
+
+                // Abandon audio focus
+                mAudioManager.abandonAudioFocus(mAudioFocusListener);
+            }
+        });
+
+        String currentTime = formatCurrentTime(skipInterval);
+        Log.d(TAG, "Saying: " + currentTime);
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "42");
+
+        Toast toast = Toast.makeText(getApplicationContext(), getResources().getString(R.string.SayingTime), Toast.LENGTH_SHORT);
+        toast.show();
+
+        SayTimeApp.mTTSEngineManager.getTTS().speak(currentTime, TextToSpeech.QUEUE_FLUSH, params);
     }
 
     private String formatCurrentTime(boolean skipInterval) {
@@ -386,13 +357,5 @@ public class SayTimeService extends Service implements OnInitListener {
             mLastTime = currentTime;
 
         return buf.toString();
-    }
-
-    @Override
-    public void onInit(int i) {
-        Log.e(TAG, "onInit called: " + i);
-        synchronized (mTextToSpeechLock) {
-            mTextToSpeechInitialized = true;
-        }
     }
 }

@@ -1,10 +1,6 @@
 package org.nsdev.saytimeapp;
 
 import android.app.Application;
-import android.content.ComponentName;
-import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
-import android.util.Log;
 
 /**
  * Created by neal on 2013-08-13.
@@ -12,14 +8,17 @@ import android.util.Log;
 public class SayTimeApp extends Application {
 
     private static final String TAG = "SayTimeApp";
+    public static TTSEngineManager mTTSEngineManager;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        mTTSEngineManager = new TTSEngineManager(this);
     }
 
     @Override
     public void onTerminate() {
+        mTTSEngineManager.destroy();
         super.onTerminate();
     }
 }

@@ -7,8 +7,8 @@
     <application
             android:name=".SayTimeApp"
             android:icon="@drawable/icon"
-            android:theme="@style/Theme.Sherlock.Light.DarkActionBar"
-            android:label="@string/app_name">
+        android:label="@string/app_name"
+        android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
 
         <activity
                 android:name=".SayTimeActivity"
@@ -48,8 +48,8 @@
         </receiver>
 
         <receiver
-                android:process=":remote"
-                android:name="AlarmIntentReceiver"/>
+            android:name="AlarmIntentReceiver"
+            android:process=":remote" />
 
         <receiver android:name="WidgetProvider">
             <intent-filter>
@@ -61,7 +61,9 @@
         </receiver>
     </application>
 
-    <uses-sdk android:minSdkVersion="9" android:targetSdkVersion="17"/>
+    <uses-sdk
+        android:minSdkVersion="9"
+        android:targetSdkVersion="18" />
 
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 

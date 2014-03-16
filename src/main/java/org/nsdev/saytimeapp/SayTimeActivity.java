@@ -20,18 +20,18 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AnalogClock;
 
-import com.actionbarsherlock.app.SherlockActivity;
+public class SayTimeActivity extends ActionBarActivity {
 
-public class SayTimeActivity extends SherlockActivity {
-
-    private static final String TAG = "SayTimeActivity";
     public static final String PREFS_NAME = "SayTimePreferences";
+    private static final String TAG = "SayTimeActivity";
 
     /** Called when the activity is first created. */
     @Override
@@ -65,8 +65,8 @@ public class SayTimeActivity extends SherlockActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu) {
-        this.getSupportMenuInflater().inflate(R.menu.main_menu, menu);
+    public boolean onCreateOptionsMenu(Menu menu) {
+        this.getMenuInflater().inflate(R.menu.main_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -75,10 +75,8 @@ public class SayTimeActivity extends SherlockActivity {
         super.onDestroy();
     }
 
-
-
     @Override
-    public boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.settings_menu) {
             // Fire off the settings panel activity
             Log.i(TAG, "Settings selected.");
