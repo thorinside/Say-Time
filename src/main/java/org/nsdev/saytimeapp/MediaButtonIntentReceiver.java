@@ -21,8 +21,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.view.KeyEvent;
@@ -69,10 +67,12 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver {
         switch (keycode) {
             case KeyEvent.KEYCODE_CAMERA:
             case KeyEvent.KEYCODE_HEADSETHOOK:
+            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
             case KEYCODE_MEDIA_PLAY:
             case KEYCODE_MEDIA_PAUSE:
                 if ((keycode == KeyEvent.KEYCODE_HEADSETHOOK && headSetEnabled) ||
                         (keycode == KeyEvent.KEYCODE_CAMERA && cameraButtonEnabled) ||
+                        (keycode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE && headSetEnabled) ||
                         (keycode == KEYCODE_MEDIA_PLAY && headSetEnabled) ||
                         (keycode == KEYCODE_MEDIA_PAUSE && headSetEnabled) ) {
                     mIsHook = true;
@@ -94,6 +94,7 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver {
                     if ((keycode == KeyEvent.KEYCODE_HEADSETHOOK && headSetEnabled) ||
                             (keycode == KEYCODE_MEDIA_PLAY && headSetEnabled) ||
                             (keycode == KEYCODE_MEDIA_PAUSE && headSetEnabled) ||
+                            (keycode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE && headSetEnabled) ||
                             (keycode == KeyEvent.KEYCODE_CAMERA && cameraButtonEnabled)) {
                         sayTime(context);
                         handled = true;
@@ -112,15 +113,17 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver {
         mPressed = false;
         mIsHook = false;
 
+        /*
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         final WakeLock mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, this.getClass().getName());
         mWakeLock.setReferenceCounted(false);
         mWakeLock.acquire();
+        */
 
         Intent intent = new Intent(context, SayTimeService.class);
         intent.setAction(SayTimeService.SAYTIME_ACTION);
         context.startService(intent);
 
-        mWakeLock.release();
+        /*mWakeLock.release()*/;
     }
 }

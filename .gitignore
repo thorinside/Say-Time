@@ -29,3 +29,7 @@ local.properties
 .settings
 build
 workspace.xml
+.idea/libraries
+.idea/
+*.iml
+

@@ -16,11 +16,11 @@
  */
 package org.nsdev.saytimeapp;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,10 +28,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AnalogClock;
 
-public class SayTimeActivity extends Activity {
+public class SayTimeActivity extends ActionBarActivity {
 
-    private static final String TAG = "SayTimeActivity";
     public static final String PREFS_NAME = "SayTimePreferences";
+    private static final String TAG = "SayTimeActivity";
 
     /** Called when the activity is first created. */
     @Override
@@ -45,8 +45,8 @@ public class SayTimeActivity extends Activity {
         final AnalogClock clock = (AnalogClock)findViewById(R.id.AnalogClock);
 
         Log.d(TAG, "Starting SayTimeService...");
-        Intent svc = new Intent(this, SayTimeService.class);
-        startService(svc);
+        //Intent svc = new Intent(this, SayTimeService.class);
+        //startService(svc);
 
         Log.d(TAG, "Started SayTimeService.");
 
@@ -66,7 +66,7 @@ public class SayTimeActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
+        this.getMenuInflater().inflate(R.menu.main_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -77,7 +77,6 @@ public class SayTimeActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         if (item.getItemId() == R.id.settings_menu) {
             // Fire off the settings panel activity
             Log.i(TAG, "Settings selected.");
