@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Parler du Temps</string>
+    <string name="set_preferences">Préférences de Parler du Temps</string>
+	<string name="preference_category_triggers">Déclencheurs</string>
+	<string name="preference_category_behaviors">Comportement</string>
+	<string name="isHeadSetButtonEnabled_Title">Activer le bouton du casque</string>
+	<string name="isHeadSetButtonEnabled_SummaryOn">Casque bouton activé.</string>
+	<string name="isHeadSetButtonEnabled_SummaryOff">Casque bouton n\'est pas activé.</string>
+	<string name="isCameraButtonEnabled_Title">Activer le bouton du camera</string>
+	<string name="isCameraButtonEnabled_SummaryOn">Camera bouton activé.</string>
+	<string name="isCameraButtonEnabled_SummaryOff">Camera bouton n\'est pas activé.</string>
+	<string name="sleepTime_Title">Le temps de dormir</string>
+	<string name="sleepTime_Summary">Secondes à attendre entre les déclencheurs.</string>
+	<string name="isPassthroughEnabled_Title">Passez le déclenchement par</string>
+	<string name="isPassthroughEnabled_SummaryOn">Les déclencheurs seront traversés.</string>
+	<string name="isPassthroughEnabled_SummaryOff">Trigger émissions seront annulées.</string>
+    <string name="calculateIntervals_Title">Intervalle Calcul</string>
+    <string name="calculateIntervals_SummaryOn">Calcul intervalle sera parlée.</string>
+    <string name="calculateIntervals_SummaryOff">Intervalle de calcul est éteint.</string>
+    <string name="terse_Title">Laconique</string>
+    <string name="terse_SummaryOn">Moins de mots seront parlées.</string>
+    <string name="terse_SummaryOff">Le temps sera parlé avec plus de mots.</string>
+    <string name="Verbose_Time">Il est %1$s heures %2$s %3$s.</string>
+    <string name="Verbose_Time_Hour">Il est %1$s heures %3$s.</string>
+    <string name="Terse_Time">%5$s heures %2$s.</string>
+    <string name="Terse_Time_Hour">%5$s heures.</string>
+    <string name="Time_AM"></string>
+    <string name="Time_PM"></string>
+    <string name="Time_InMorning">du matin</string>
+    <string name="Time_InAfternoon">de l\'après-midi</string>
+    <string name="Time_InEvening">du soir</string>
+    <string name="SayingTime">Dire l\'heure...</string>
+    <string name="Settings">Paramètres</string>
+    <string name="it_has_been">Il a été</string>
+    <string name="hour">heure</string>
+    <string name="hours">heures</string>
+    <string name="minute">minute</string>
+    <string name="minutes">minutes</string>
+    <string name="second">seconde</string>
+    <string name="seconds">secondes</string>
+    <string name="and">et</string>
+    <string name="since_you_last_asked">depuis la dernière demande.</string>
+    <string name="trigger_hourly_summary_off">Le temps ne sera pas parlé au début de chaque heure.</string>
+    <string name="trigger_hourly_summary_on">Le temps sera parlée au début de chaque heure.</string>
+    <string name="trigger_hourly_title">Carillon Horaire</string>
+    <string name="Privacy">Politique de confidentialité</string>
+    
+</resources>

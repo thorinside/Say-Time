@@ -32,4 +32,4 @@ workspace.xml
 .idea/libraries
 .idea/
 *.iml
-
+.gradle/
