@@ -19,6 +19,7 @@ package org.nsdev.saytimeapp;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -83,6 +84,12 @@ public class SayTimeActivity extends ActionBarActivity {
 
             Intent settingsActivity = new Intent(getBaseContext(), SettingsActivity.class);
             startActivity(settingsActivity);
+        }
+
+        if (item.getItemId() == R.id.privacy_menu) {
+            // The code for opening a URL in a Browser in Android:
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://cdn.rawgit.com/thorinside/Say-Time/develop/privacy-policy.html"));
+            startActivity(browserIntent);
         }
 
         return super.onOptionsItemSelected(item);

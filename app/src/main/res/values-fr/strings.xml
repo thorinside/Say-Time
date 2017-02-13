@@ -44,5 +44,6 @@
     <string name="trigger_hourly_summary_off">Le temps ne sera pas parlé au début de chaque heure.</string>
     <string name="trigger_hourly_summary_on">Le temps sera parlée au début de chaque heure.</string>
     <string name="trigger_hourly_title">Carillon Horaire</string>
+    <string name="Privacy">Politique de confidentialité</string>
     
 </resources>
