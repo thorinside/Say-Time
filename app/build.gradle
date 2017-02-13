@@ -8,8 +8,8 @@ android {
         applicationId "org.nsdev.saytimeapp"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 13
-        versionName "1.5.4"
+        versionCode 14
+        versionName "1.5.5"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
