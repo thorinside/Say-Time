@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="org.nsdev.saytimeapp"
-          android:versionCode="13"
-          android:versionName="1.5.4">
+    >
 
     <application
-            android:name=".SayTimeApp"
-            android:icon="@drawable/icon"
+        android:name=".SayTimeApp"
+        android:icon="@drawable/icon"
         android:label="@string/app_name"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
 
         <activity
-                android:name=".SayTimeActivity"
-                android:label="@string/app_name">
+            android:name=".SayTimeActivity"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -20,13 +19,13 @@
         </activity>
 
         <activity
-                android:name=".SettingsActivity"
-                android:label="@string/set_preferences">
+            android:name=".SettingsActivity"
+            android:label="@string/set_preferences">
         </activity>
 
 
         <service
-                android:name="SayTimeService"/>
+            android:name="SayTimeService"/>
 
 
         <!-- Adding a receiver that will intercept the media button and perform 
@@ -49,21 +48,17 @@
 
         <receiver
             android:name="AlarmIntentReceiver"
-            android:process=":remote" />
+            android:process=":remote"/>
 
         <receiver android:name="WidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
             </intent-filter>
             <meta-data
-                    android:name="android.appwidget.provider"
-                    android:resource="@xml/appwidget_info"/>
+                android:name="android.appwidget.provider"
+                android:resource="@xml/appwidget_info"/>
         </receiver>
     </application>
-
-    <uses-sdk
-        android:minSdkVersion="9"
-        android:targetSdkVersion="18" />
 
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
